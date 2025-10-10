@@ -1,0 +1,21 @@
+{
+    "model_path": "jarvis-model",
+    "train_batch_size": 2,
+    "gradient_accumulation_steps": 4,
+    "learning_rate": 2e-5,
+    "num_train_epochs": 10,
+    "save_steps": 5,
+    "max_grad_norm": 0.5,
+    "fp16": true,
+    "gpu_settings": {
+        "device": "cuda",
+        "precision": "float16",
+        "memory_efficient": true,
+        "cuda_device": 0,
+        "allow_tf32": true,
+        "benchmark": true
+    },
+    "warmup_steps": 100,
+    "weight_decay": 0.01,
+    "adam_epsilon": 1e-8
+}

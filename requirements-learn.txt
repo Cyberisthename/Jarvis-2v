@@ -1,0 +1,9 @@
+# Dependencies for the continuous learning process
+requests
+beautifulsoup4
+accelerate
+bitsandbytes
+# These are also in the main requirements.txt but are essential for training
+torch
+transformers
+sentencepiece

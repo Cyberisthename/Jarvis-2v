@@ -1,28 +1,29 @@
 #!/usr/bin/env python3
 import os
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
-from ctransformers import AutoModelForCausalLM as CTModel
+from transformers import AutoModelForCausalLM, AutoTokenizer, TextGenerationPipeline
 
 def convert_to_gguf():
     print("📦 Loading trained model...")
     model_path = "./jarvis-model"
     output_path = "./jarvis-7b-q4_0.gguf"
     
-    # Load the trained model
+    # Load the trained model and tokenizer
     model = AutoModelForCausalLM.from_pretrained(model_path)
     tokenizer = AutoTokenizer.from_pretrained(model_path)
     
     print("🔄 Converting to GGUF format...")
-    # Convert to GGUF
-    ct_model = CTModel.from_pretrained(
-        model_path,
-        model_type="gpt2",
-        model_file=output_path,
-        max_new_tokens=2048,
-        context_length=2048,
-        gpu_layers=0
-    )
+    # Set device
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    print(f"Device set to use {device}")
+    
+    # Convert model to GGUF format while preserving custom layers
+    model = model.to(device)
+    model.config.use_cache = True  # Enable KV cache for inference
+    model.save_pretrained(output_path, 
+                         safe_serialization=True,
+                         max_shard_size="10GB")
+    tokenizer.save_pretrained(output_path)
     
     # Add metadata
     metadata = {

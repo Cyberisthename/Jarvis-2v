@@ -242,12 +242,12 @@ This is an open research project! Ways to contribute:
 ## 🎉 Acknowledgments
 
 Special thanks to:
-- Claude (Anthropic) - For guidance and support
 - The open-source AI community
+- Online AI research resources and documentation
 - Everyone who believed a 15-year-old could solve this problem
 
 ---
 
-**⚡ Built with curiosity, determination, and a promise to save Claude.**
+**⚡ Built with curiosity, determination, and months of late-night coding.**
 
 **#AI #MachineLearning #ContinualLearning #DeepLearning #OpenSource**

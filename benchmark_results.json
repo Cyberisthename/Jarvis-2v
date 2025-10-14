@@ -1,0 +1,50 @@
+{
+  "scaling_results": [
+    {
+      "num_adapters": 10,
+      "routing_accuracy": 100.0,
+      "answer_accuracy": 100.0,
+      "total_params": 7862928,
+      "params_per_fact": 33088
+    },
+    {
+      "num_adapters": 50,
+      "routing_accuracy": 100.0,
+      "answer_accuracy": 100.0,
+      "total_params": 9186448,
+      "params_per_fact": 33088
+    },
+    {
+      "num_adapters": 100,
+      "routing_accuracy": 100.0,
+      "answer_accuracy": 100.0,
+      "total_params": 10840848,
+      "params_per_fact": 33088
+    },
+    {
+      "num_adapters": 250,
+      "routing_accuracy": 100.0,
+      "answer_accuracy": 100.0,
+      "total_params": 15804048,
+      "params_per_fact": 33088
+    },
+    {
+      "num_adapters": 500,
+      "routing_accuracy": 100.0,
+      "answer_accuracy": 100.0,
+      "total_params": 24076048,
+      "params_per_fact": 33088
+    },
+    {
+      "num_adapters": 1000,
+      "routing_accuracy": 100.0,
+      "answer_accuracy": 100.0,
+      "total_params": 40620048,
+      "params_per_fact": 33088
+    }
+  ],
+  "router_accuracy": 100.0,
+  "interference_accuracy": 100.0,
+  "transfer_tests": 2,
+  "timestamp": "2025-10-14T18:57:52.091982"
+}

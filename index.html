@@ -6,21 +6,42 @@
     <title>J.A.R.V.I.S. AI System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <style>
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(59, 130, 246, 0.5);
+            border-radius: 9999px;
+        }
+    </style>
 </head>
-<body class="bg-gray-900 text-white min-h-screen">
+<body class="bg-gray-950 text-white min-h-screen">
     <div id="app">
         <!-- Header -->
-        <header class="bg-gray-800 border-b border-gray-700 p-4">
+        <header class="bg-gray-900/80 border-b border-gray-800 backdrop-blur-lg p-4">
             <div class="container mx-auto flex items-center justify-between">
                 <div class="flex items-center space-x-3">
                     <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                         <i data-lucide="cpu" class="w-6 h-6"></i>
                     </div>
-                    <h1 class="text-2xl font-bold">J.A.R.V.I.S.</h1>
+                    <div>
+                        <h1 class="text-2xl font-bold">J.A.R.V.I.S.</h1>
+                        <p class="text-xs text-gray-400">Adaptive Multiplex AI Operations Console</p>
+                    </div>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <span id="status" class="text-sm text-gray-400">Initializing...</span>
-                    <button id="voice-btn" class="p-2 bg-gray-700 rounded-lg hover:bg-gray-600">
+                    <div class="flex items-center space-x-2 text-sm text-gray-400">
+                        <span class="inline-flex items-center">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse mr-2"></span>
+                            <span id="status">Initializing...</span>
+                        </span>
+                    </div>
+                    <button id="voice-btn" class="p-2 bg-gray-800 border border-gray-700 rounded-lg hover:border-gray-500 transition">
                         <i data-lucide="mic" class="w-5 h-5"></i>
                     </button>
                 </div>
@@ -28,63 +49,133 @@
         </header>
 
         <!-- Main Content -->
-        <main class="container mx-auto p-4 max-w-4xl">
+        <main class="container mx-auto p-4 max-w-6xl space-y-6">
             <!-- Chat Interface -->
-            <div class="bg-gray-800 rounded-lg p-6 mb-6">
-                <div id="chat-messages" class="space-y-4 mb-4 max-h-96 overflow-y-auto">
-                    <div class="bg-gray-700 rounded-lg p-4">
-                        <p class="text-sm text-gray-300 mb-2">J.A.R.V.I.S.</p>
+            <section class="bg-gray-900/70 border border-gray-800 rounded-2xl p-6 shadow-xl shadow-blue-900/10">
+                <div class="flex items-center justify-between flex-wrap gap-4 mb-6">
+                    <div>
+                        <h2 class="text-xl font-semibold">Conversational Console</h2>
+                        <p class="text-sm text-gray-400">Engage with the J.A.R.V.I.S. inference core in real-time.</p>
+                    </div>
+                    <div class="flex items-center space-x-3 text-xs text-gray-400">
+                        <span class="flex items-center space-x-1">
+                            <i data-lucide="database" class="w-4 h-4"></i>
+                            <span>2048 token context</span>
+                        </span>
+                        <span class="hidden sm:flex items-center space-x-1">
+                            <i data-lucide="cpu" class="w-4 h-4"></i>
+                            <span>GGUF accelerated</span>
+                        </span>
+                    </div>
+                </div>
+                <div class="bg-gray-950/50 border border-gray-800 rounded-xl p-4 mb-4 max-h-[28rem] overflow-y-auto" id="chat-messages">
+                    <div class="bg-gray-800/60 border border-gray-700 rounded-lg p-4">
+                        <p class="text-sm text-gray-400 mb-2">J.A.R.V.I.S.</p>
                         <p>🚀 Welcome! I'm J.A.R.V.I.S., your advanced AI assistant. I'm running locally on your device with a GGUF quantized model. How can I help you today?</p>
                     </div>
                 </div>
-                
-                <div class="flex space-x-2">
+                <div class="flex space-x-3">
                     <input 
                         type="text" 
                         id="message-input" 
                         placeholder="Ask J.A.R.V.I.S. anything..."
-                        class="flex-1 bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        class="flex-1 bg-gray-950/80 border border-gray-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/70"
                     >
                     <button 
                         id="send-btn" 
-                        class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-lg flex items-center space-x-2"
+                        class="bg-blue-600 hover:bg-blue-500 px-6 py-3 rounded-xl flex items-center space-x-2 text-sm font-semibold transition"
                     >
                         <i data-lucide="send" class="w-4 h-4"></i>
                         <span>Send</span>
                     </button>
                 </div>
-            </div>
+            </section>
 
-            <!-- Model Info -->
-            <div class="bg-gray-800 rounded-lg p-6">
-                <h2 class="text-xl font-bold mb-4">Model Information</h2>
-                <div class="grid grid-cols-2 gap-4">
+            <!-- Global Anomaly Visualization -->
+            <section class="bg-gray-900/70 border border-gray-800 rounded-2xl p-6 shadow-xl shadow-blue-900/10">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
                     <div>
-                        <p class="text-sm text-gray-400">Model</p>
-                        <p id="model-name" class="font-semibold">J.A.R.V.I.S-7B-Q4_0</p>
+                        <h2 class="text-xl font-semibold">Global Anomaly Detection Grid</h2>
+                        <p class="text-sm text-gray-400">Visualize live anomaly impact zones across a dynamic 3D globe and 2D Mercator projection.</p>
                     </div>
-                    <div>
-                        <p class="text-sm text-gray-400">Status</p>
-                        <p id="model-status" class="font-semibold text-green-400">Ready</p>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-400">Context Size</p>
-                        <p class="font-semibold">2048 tokens</p>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-400">Temperature</p>
-                        <p class="font-semibold">0.7</p>
+                    <div class="flex items-center gap-2">
+                        <button id="transition-toggle" class="px-4 py-2 rounded-xl border border-blue-500/40 text-sm font-medium bg-blue-600/30 hover:bg-blue-600/40 transition">
+                            Switch to 2D View
+                        </button>
+                        <button id="animation-toggle" class="px-4 py-2 rounded-xl border border-gray-700 text-sm font-medium bg-gray-800 hover:bg-gray-700 transition">
+                            Pause Animation
+                        </button>
                     </div>
                 </div>
-            </div>
+                <div class="grid lg:grid-cols-[1.7fr_1fr] gap-6">
+                    <div class="relative w-full min-h-[420px]">
+                        <canvas id="anomaly-canvas" class="w-full h-full rounded-xl bg-gray-950/60 border border-gray-800"></canvas>
+                        <div class="absolute top-4 left-4 flex flex-col gap-1 bg-gray-900/70 backdrop-blur rounded-lg border border-gray-800 px-4 py-3">
+                            <div class="text-xs font-semibold uppercase tracking-wide text-gray-400">Mode</div>
+                            <div class="flex items-center space-x-2">
+                                <span class="w-2 h-2 rounded-full bg-sky-400" id="view-indicator"></span>
+                                <span class="font-medium" id="view-label">3D Globe</span>
+                            </div>
+                            <span class="text-xs text-gray-500" id="anomaly-count">0 active anomalies</span>
+                        </div>
+                        <div class="absolute bottom-4 right-4 text-[0.65rem] bg-gray-900/70 border border-gray-800 rounded-lg px-3 py-2 text-gray-400">
+                            <span>Markers sized & colored by severity • Timestamps drive pulse animation</span>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="bg-gray-950/70 border border-gray-800 rounded-xl p-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="font-semibold text-sm uppercase tracking-wide text-gray-400">Live Anomaly Feed</h3>
+                                <span class="text-xs text-gray-500" id="last-update">—</span>
+                            </div>
+                            <ul id="anomaly-list" class="space-y-3 max-h-64 overflow-y-auto pr-1"></ul>
+                        </div>
+                        <div class="bg-gray-950/70 border border-gray-800 rounded-xl p-4">
+                            <h3 class="font-semibold text-sm uppercase tracking-wide text-gray-400 mb-3">Temporal Patterns</h3>
+                            <div id="anomaly-timeline" class="space-y-2 text-sm text-gray-300"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Model Info -->
+            <section class="bg-gray-900/70 border border-gray-800 rounded-2xl p-6 shadow-xl shadow-blue-900/10">
+                <h2 class="text-xl font-semibold mb-6">Model Information</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-sm">
+                    <div class="bg-gray-950/40 border border-gray-800 rounded-xl p-4">
+                        <p class="text-gray-400">Model</p>
+                        <p id="model-name" class="font-semibold text-white">J.A.R.V.I.S-7B-Q4_0</p>
+                    </div>
+                    <div class="bg-gray-950/40 border border-gray-800 rounded-xl p-4">
+                        <p class="text-gray-400">Status</p>
+                        <p id="model-status" class="font-semibold text-emerald-400">Ready</p>
+                    </div>
+                    <div class="bg-gray-950/40 border border-gray-800 rounded-xl p-4">
+                        <p class="text-gray-400">Context Size</p>
+                        <p class="font-semibold text-white">2048 tokens</p>
+                    </div>
+                    <div class="bg-gray-950/40 border border-gray-800 rounded-xl p-4">
+                        <p class="text-gray-400">Temperature</p>
+                        <p class="font-semibold text-white">0.7</p>
+                    </div>
+                    <div class="bg-gray-950/40 border border-gray-800 rounded-xl p-4">
+                        <p class="text-gray-400">Max Tokens</p>
+                        <p class="font-semibold text-white">2048</p>
+                    </div>
+                    <div class="bg-gray-950/40 border border-gray-800 rounded-xl p-4">
+                        <p class="text-gray-400">Streaming</p>
+                        <p class="font-semibold text-white">Enabled</p>
+                    </div>
+                </div>
+            </section>
         </main>
     </div>
 
-    <script>
-        // Initialize Lucide icons
-        lucide.createIcons();
+    <script type="module">
+        import * as THREE from 'https://unpkg.com/three@0.158.0/build/three.module.js';
+        import { OrbitControls } from 'https://unpkg.com/three@0.158.0/examples/jsm/controls/OrbitControls.js';
 
-        // J.A.R.V.I.S. Web Interface
+        // --- Chat Experience -------------------------------------------------
         class JarvisWebInterface {
             constructor() {
                 this.messages = [];
@@ -100,7 +191,10 @@
 
                 sendBtn.addEventListener('click', () => this.sendMessage());
                 messageInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') this.sendMessage();
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        this.sendMessage();
+                    }
                 });
                 voiceBtn.addEventListener('click', () => this.toggleVoice());
             }
@@ -108,7 +202,7 @@
             async sendMessage() {
                 const input = document.getElementById('message-input');
                 const message = input.value.trim();
-                
+
                 if (!message || this.isProcessing) return;
 
                 this.addMessage('user', message);
@@ -117,10 +211,10 @@
                 this.updateStatus('Processing...');
 
                 try {
-                    // Simulate API call to local backend
                     const response = await this.callJarvisAPI(message);
                     this.addMessage('assistant', response.text);
                 } catch (error) {
+                    console.error('Chat error:', error);
                     this.addMessage('assistant', 'Sorry, I encountered an error. Please try again.');
                 } finally {
                     this.isProcessing = false;
@@ -129,48 +223,600 @@
             }
 
             async callJarvisAPI(message) {
-                // In a real implementation, this would call your local API
-                // For now, simulate a response
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                
+                const payload = {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
+                };
+
+                const endpoints = ['/api/chat', '/chat'];
+                for (const endpoint of endpoints) {
+                    try {
+                        const response = await fetch(endpoint, payload);
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}`);
+                        }
+
+                        const data = await response.json();
+                        return {
+                            text: data?.text || data?.message?.content || 'I am J.A.R.V.I.S. ready to assist you.',
+                            tokens: data?.usage?.total_tokens ?? 0,
+                            time: data?.latency ?? 0
+                        };
+                    } catch (error) {
+                        console.warn(`Chat endpoint ${endpoint} failed:`, error.message);
+                    }
+                }
+
+                // Fallback to simulated response
+                await new Promise(resolve => setTimeout(resolve, 750));
                 return {
-                    text: `I am J.A.R.V.I.S. responding to: "${message}". This is a locally running AI model using GGUF format for efficient inference.`,
-                    tokens: 42,
-                    time: 1.2
+                    text: `I am J.A.R.V.I.S. responding to: "${message}". This local interface is currently operating in resilience mode without a live model response.`,
+                    tokens: 32,
+                    time: 0.8
                 };
             }
 
             addMessage(role, content) {
                 const messagesContainer = document.getElementById('chat-messages');
                 const messageDiv = document.createElement('div');
-                messageDiv.className = 'bg-gray-700 rounded-lg p-4';
-                
+                messageDiv.className = 'bg-gray-800/60 border border-gray-700 rounded-lg p-4';
+
                 const roleDiv = document.createElement('p');
-                roleDiv.className = 'text-sm text-gray-300 mb-2';
+                roleDiv.className = 'text-sm text-gray-400 mb-2';
                 roleDiv.textContent = role === 'user' ? 'You' : 'J.A.R.V.I.S.';
-                
+
                 const contentDiv = document.createElement('p');
                 contentDiv.textContent = content;
-                
+
                 messageDiv.appendChild(roleDiv);
                 messageDiv.appendChild(contentDiv);
                 messagesContainer.appendChild(messageDiv);
-                
+
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
             }
 
             updateStatus(status) {
-                document.getElementById('status').textContent = status;
+                const statusEl = document.getElementById('status');
+                if (statusEl) statusEl.textContent = status;
             }
 
             toggleVoice() {
-                // Voice functionality would be implemented here
                 alert('Voice interface coming soon!');
             }
         }
 
-        // Initialize the interface
-        const jarvis = new JarvisWebInterface();
+        // --- Global Anomaly Visualization -----------------------------------
+        class AnomalyVisualizer {
+            constructor(canvas, elements) {
+                this.canvas = canvas;
+                this.elements = elements;
+                this.clock = new THREE.Clock();
+                this.markerStates = [];
+                this.transitionProgress = 0;
+                this.targetProgress = 0;
+                this.isAnimating = true;
+                this.globeRadius = 1;
+                this.mapWidth = 2.8;
+                this.mapHeight = this.mapWidth / 2;
+                this.pendingAnimationFrame = null;
+                this.markerCapacity = 0;
+
+                this.scene = new THREE.Scene();
+                this.scene.background = new THREE.Color('#020617');
+
+                this.renderer = new THREE.WebGLRenderer({
+                    canvas: this.canvas,
+                    antialias: true,
+                    alpha: true
+                });
+                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                this.updateRendererSize();
+
+                this.camera = new THREE.PerspectiveCamera(42, this.canvas.clientWidth / this.canvas.clientHeight, 0.1, 100);
+                this.camera.position.set(0, 0, 3.2);
+                this.scene.add(this.camera);
+
+                this.controls = new OrbitControls(this.camera, this.canvas);
+                this.controls.enableDamping = true;
+                this.controls.minDistance = 1.5;
+                this.controls.maxDistance = 6;
+                this.controls.enablePan = false;
+
+                const ambient = new THREE.AmbientLight(0xffffff, 0.5);
+                const directional = new THREE.DirectionalLight(0xffffff, 1.1);
+                directional.position.set(5, 3, 4);
+                const rim = new THREE.DirectionalLight(0x93c5fd, 0.3);
+                rim.position.set(-4, -2, -6);
+                this.scene.add(ambient, directional, rim);
+
+                this.globeMaterial = new THREE.MeshPhongMaterial({
+                    color: 0x0f172a,
+                    emissive: 0x060b1c,
+                    shininess: 12,
+                    specular: 0x1f2937,
+                    transparent: true,
+                    opacity: 1
+                });
+
+                const globeGeometry = new THREE.SphereGeometry(this.globeRadius, 96, 96);
+                this.globe = new THREE.Mesh(globeGeometry, this.globeMaterial);
+                this.scene.add(this.globe);
+
+                this.mapMaterial = new THREE.MeshBasicMaterial({
+                    color: 0x0f172a,
+                    transparent: true,
+                    opacity: 0,
+                    side: THREE.DoubleSide,
+                    depthWrite: false
+                });
+
+                const mapGeometry = new THREE.PlaneGeometry(this.mapWidth, this.mapHeight, 64, 32);
+                this.map = new THREE.Mesh(mapGeometry, this.mapMaterial);
+                this.map.position.set(0, 0, 0);
+                this.scene.add(this.map);
+
+                this.loadTextures();
+                this.createMarkerSystem([]);
+                this.bindEvents();
+                this.startAnimationLoop();
+                this.bootstrapData();
+            }
+
+            loadTextures() {
+                const loader = new THREE.TextureLoader();
+                loader.crossOrigin = '';
+
+                loader.load(
+                    'https://raw.githubusercontent.com/creativetimofficial/public-assets/master/soft-ui-design-system/assets/img/earth.jpg',
+                    (texture) => {
+                        texture.colorSpace = THREE.SRGBColorSpace;
+                        this.globeMaterial.map = texture;
+                        this.globeMaterial.needsUpdate = true;
+                    },
+                    undefined,
+                    () => {
+                        this.globeMaterial.color = new THREE.Color('#1e293b');
+                    }
+                );
+
+                loader.load(
+                    'https://raw.githubusercontent.com/datasets/geo-boundaries-world-110m/master/img/world-map.png',
+                    (texture) => {
+                        texture.colorSpace = THREE.SRGBColorSpace;
+                        this.mapMaterial.map = texture;
+                        this.mapMaterial.needsUpdate = true;
+                    },
+                    undefined,
+                    () => {
+                        this.mapMaterial.color = new THREE.Color('#1f2937');
+                    }
+                );
+            }
+
+            bindEvents() {
+                window.addEventListener('resize', () => this.handleResize());
+
+                if (this.elements.toggleButton) {
+                    this.elements.toggleButton.addEventListener('click', () => this.toggleView());
+                }
+
+                if (this.elements.animationButton) {
+                    this.elements.animationButton.addEventListener('click', () => this.toggleAnimation());
+                }
+
+                if (window.io) {
+                    try {
+                        this.socket = window.io();
+                        this.socket.on('anomaly_update', (payload) => {
+                            if (Array.isArray(payload)) {
+                                this.ingestData(payload);
+                            } else if (payload) {
+                                this.ingestData([payload]);
+                            }
+                        });
+                    } catch (error) {
+                        console.warn('Socket connection unavailable:', error?.message || error);
+                    }
+                }
+            }
+
+            handleResize() {
+                this.updateRendererSize();
+                this.camera.aspect = this.canvas.clientWidth / this.canvas.clientHeight;
+                this.camera.updateProjectionMatrix();
+            }
+
+            updateRendererSize() {
+                const rect = this.canvas.getBoundingClientRect();
+                const width = Math.max(rect.width, 320);
+                const height = Math.max(rect.height, 240);
+                this.renderer.setSize(width, height, false);
+            }
+
+            toggleView() {
+                this.targetProgress = this.targetProgress === 1 ? 0 : 1;
+                const label = this.targetProgress === 1 ? '2D Mercator' : '3D Globe';
+                if (this.elements.viewLabel) this.elements.viewLabel.textContent = label;
+                if (this.elements.viewIndicator) {
+                    this.elements.viewIndicator.classList.toggle('bg-sky-400', this.targetProgress < 0.5);
+                    this.elements.viewIndicator.classList.toggle('bg-rose-400', this.targetProgress >= 0.5);
+                }
+                if (this.elements.toggleButton) {
+                    this.elements.toggleButton.textContent = this.targetProgress === 1 ? 'Switch to 3D View' : 'Switch to 2D View';
+                }
+            }
+
+            toggleAnimation() {
+                this.isAnimating = !this.isAnimating;
+                if (this.elements.animationButton) {
+                    this.elements.animationButton.textContent = this.isAnimating ? 'Pause Animation' : 'Resume Animation';
+                }
+            }
+
+            createMarkerSystem(data) {
+                if (this.markerMesh) {
+                    this.scene.remove(this.markerMesh);
+                    this.markerMesh.geometry.dispose();
+                    this.markerMesh.material.dispose();
+                }
+
+                const geometry = new THREE.IcosahedronGeometry(0.025, 2);
+                const material = new THREE.MeshStandardMaterial({
+                    color: 0xffffff,
+                    transparent: true,
+                    opacity: 0.95,
+                    metalness: 0.1,
+                    roughness: 0.3,
+                    depthWrite: false
+                });
+
+                const capacity = Math.max(data.length, 1);
+                this.markerMesh = new THREE.InstancedMesh(geometry, material, capacity);
+                this.markerCapacity = capacity;
+                this.markerMesh.count = capacity;
+                this.markerMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+                this.markerMesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(capacity * 3), 3);
+                this.markerMesh.instanceColor.setUsage(THREE.DynamicDrawUsage);
+                this.scene.add(this.markerMesh);
+
+                this.markerStates = [];
+                if (data.length > 0) {
+                    this.ingestData(data, false);
+                } else {
+                    this.updateMarkerMesh();
+                    this.renderPanels();
+                }
+            }
+
+            ingestData(data, allowResize = true) {
+                if (!Array.isArray(data) || data.length === 0) return;
+
+                const now = Date.now();
+                const merged = [...this.markerStates];
+                const map = new Map(merged.map(item => [item.id, item]));
+
+                data.forEach((item, index) => {
+                    const id = item.id || `${item.lat}_${item.lon}_${item.timestamp ?? now + index}`;
+                    const severity = THREE.MathUtils.clamp(item.severity ?? 0.5, 0, 1.2);
+
+                    const entry = {
+                        id,
+                        name: item.name || item.label || 'Unidentified Event',
+                        region: item.region || this.deriveRegion(item.lat, item.lon),
+                        lat: item.lat,
+                        lon: item.lon,
+                        severity,
+                        timestamp: item.timestamp ?? now,
+                        description: item.description || 'Global anomaly signal detected.'
+                    };
+
+                    entry.spherePosition = this.latLonToSphere(entry.lat, entry.lon, this.globeRadius + 0.04 + severity * 0.1);
+                    entry.mapPosition = this.latLonToMercator(entry.lat, entry.lon);
+                    entry.baseScale = 0.04 + severity * 0.09;
+                    entry.color = this.severityToColor(severity);
+
+                    map.set(id, entry);
+                });
+
+                this.markerStates = Array.from(map.values());
+                this.markerStates.sort((a, b) => b.severity - a.severity);
+
+                const MAX_MARKERS = 256;
+                if (this.markerStates.length > MAX_MARKERS) {
+                    this.markerStates = this.markerStates.slice(0, MAX_MARKERS);
+                }
+
+                if (allowResize && this.markerStates.length > this.markerCapacity) {
+                    this.createMarkerSystem(this.markerStates);
+                    return;
+                }
+
+                this.updateMarkerMesh();
+                this.renderPanels();
+            }
+
+            deriveRegion(lat, lon) {
+                const ns = lat >= 0 ? 'N' : 'S';
+                const ew = lon >= 0 ? 'E' : 'W';
+                return `${Math.abs(lat).toFixed(1)}°${ns}, ${Math.abs(lon).toFixed(1)}°${ew}`;
+            }
+
+            severityToColor(severity) {
+                const clamped = THREE.MathUtils.clamp(severity, 0, 1.2);
+                const color = new THREE.Color();
+                if (clamped < 0.33) {
+                    color.setRGB(0.2, 0.78, 0.98);
+                } else if (clamped < 0.66) {
+                    color.setRGB(0.97, 0.79, 0.16);
+                } else if (clamped < 0.95) {
+                    color.setRGB(0.98, 0.47, 0.15);
+                } else {
+                    color.setRGB(0.84, 0.15, 0.32);
+                }
+                return color;
+            }
+
+            latLonToSphere(lat, lon, radius = 1) {
+                const phi = THREE.MathUtils.degToRad(90 - lat);
+                const theta = THREE.MathUtils.degToRad(lon + 180);
+
+                const x = radius * Math.sin(phi) * Math.cos(theta);
+                const y = radius * Math.cos(phi);
+                const z = radius * Math.sin(phi) * Math.sin(theta);
+
+                return new THREE.Vector3(x, y, z);
+            }
+
+            latLonToMercator(lat, lon) {
+                const lambda = THREE.MathUtils.degToRad(THREE.MathUtils.euclideanModulo(lon + 180, 360) - 180);
+                const phi = THREE.MathUtils.degToRad(THREE.MathUtils.clamp(lat, -85, 85));
+
+                const x = (lambda + Math.PI) / (2 * Math.PI);
+                const y = 0.5 - Math.log((1 + Math.sin(phi)) / (1 - Math.sin(phi))) / (4 * Math.PI);
+
+                const posX = (x - 0.5) * this.mapWidth;
+                const posY = (0.5 - y) * this.mapHeight;
+                const posZ = 0.01;
+
+                return new THREE.Vector3(posX, posY, posZ);
+            }
+
+            updateMarkerMesh() {
+                const dummy = new THREE.Object3D();
+
+                const count = this.markerStates.length;
+                if (!this.markerMesh) return;
+                if (count === 0) {
+                    this.markerMesh.count = 0;
+                    this.markerMesh.instanceMatrix.needsUpdate = true;
+                    return;
+                }
+
+                const active = Math.min(count, this.markerCapacity);
+                this.markerMesh.count = active;
+
+                for (let index = 0; index < active; index++) {
+                    const state = this.markerStates[index];
+                    this.markerMesh.instanceColor.setXYZ(index, state.color.r, state.color.g, state.color.b);
+                    dummy.position.copy(state.spherePosition);
+                    dummy.scale.setScalar(state.baseScale);
+                    dummy.lookAt(new THREE.Vector3(0, 0, 0));
+                    dummy.updateMatrix();
+                    this.markerMesh.setMatrixAt(index, dummy.matrix);
+                }
+
+                this.markerMesh.instanceMatrix.needsUpdate = true;
+                this.markerMesh.instanceColor.needsUpdate = true;
+                if (this.elements.count) {
+                    this.elements.count.textContent = `${count} active anomalies`;
+                }
+                if (this.elements.lastUpdate) {
+                    this.elements.lastUpdate.textContent = `Updated ${new Date().toLocaleTimeString()}`;
+                }
+            }
+
+            updateMarkerAnimation(delta) {
+                if (!this.markerMesh || this.markerStates.length === 0) return;
+
+                const dummy = new THREE.Object3D();
+                const time = performance.now();
+
+                const lerpFactor = THREE.MathUtils.clamp(this.targetProgress === 1 ? 0.08 : 0.06, 0.02, 0.15);
+                this.transitionProgress = THREE.MathUtils.damp(this.transitionProgress, this.targetProgress, lerpFactor / delta, delta);
+
+                const active = Math.min(this.markerMesh.count, this.markerStates.length);
+
+                for (let index = 0; index < active; index++) {
+                    const state = this.markerStates[index];
+                    const position = state.spherePosition.clone().lerp(state.mapPosition, this.transitionProgress);
+
+                    const pulse = 1 + Math.sin((time - state.timestamp) * 0.0015) * 0.2 * state.severity;
+                    const scale = state.baseScale * (0.9 + 0.3 * Math.sin(time * 0.002 + index));
+
+                    dummy.position.copy(position);
+                    dummy.scale.setScalar(scale * pulse);
+                    dummy.lookAt(new THREE.Vector3(0, 0, 0));
+                    dummy.updateMatrix();
+                    this.markerMesh.setMatrixAt(index, dummy.matrix);
+                }
+
+                this.markerMesh.instanceMatrix.needsUpdate = true;
+
+                this.globeMaterial.opacity = 1 - this.transitionProgress;
+                this.mapMaterial.opacity = THREE.MathUtils.lerp(this.mapMaterial.opacity, this.transitionProgress, 0.1);
+
+                this.controls.enabled = this.targetProgress < 0.95;
+                this.controls.enableRotate = this.controls.enabled;
+            }
+
+            renderPanels() {
+                if (this.elements.list) {
+                    this.elements.list.innerHTML = this.markerStates.slice(0, 12).map((state) => {
+                        const severityLabel = state.severity < 0.33 ? 'Low' : state.severity < 0.66 ? 'Moderate' : state.severity < 0.95 ? 'High' : 'Critical';
+                        const badgeColor = state.severity < 0.33 ? 'bg-sky-500/20 text-sky-300 border-sky-500/40' : state.severity < 0.66 ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' : state.severity < 0.95 ? 'bg-orange-500/25 text-orange-200 border-orange-500/40' : 'bg-rose-600/25 text-rose-200 border-rose-500/40';
+                        return `
+                            <li class="bg-gray-900/60 border border-gray-800 rounded-lg p-3">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-semibold">${state.name}</p>
+                                        <p class="text-xs text-gray-400">${state.region}</p>
+                                    </div>
+                                    <span class="text-[0.65rem] px-2 py-1 rounded-full border ${badgeColor}">${severityLabel}</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-2 leading-relaxed">${state.description}</p>
+                                <p class="text-[0.65rem] text-gray-500 mt-2">${new Date(state.timestamp).toLocaleTimeString()}</p>
+                            </li>
+                        `;
+                    }).join('');
+                }
+
+                if (this.elements.timeline) {
+                    const sortedByTime = [...this.markerStates].sort((a, b) => b.timestamp - a.timestamp);
+                    this.elements.timeline.innerHTML = sortedByTime.slice(0, 6).map((state) => {
+                        const since = this.timeSince(state.timestamp);
+                        const width = Math.min(100, Math.max(10, state.severity * 100));
+                        return `
+                            <div>
+                                <div class="flex items-center justify-between text-xs text-gray-400 mb-1">
+                                    <span>${state.name}</span>
+                                    <span>${since}</span>
+                                </div>
+                                <div class="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
+                                    <div class="h-full rounded-full" style="width: ${width}%; background: linear-gradient(90deg, rgba(56,189,248,0.9), rgba(236,72,153,0.9));"></div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            }
+
+            timeSince(timestamp) {
+                const delta = Math.max(0, Date.now() - timestamp);
+                const seconds = Math.floor(delta / 1000);
+                if (seconds < 60) return `${seconds}s ago`;
+                const minutes = Math.floor(seconds / 60);
+                if (minutes < 60) return `${minutes}m ago`;
+                const hours = Math.floor(minutes / 60);
+                if (hours < 24) return `${hours}h ago`;
+                const days = Math.floor(hours / 24);
+                return `${days}d ago`;
+            }
+
+            startAnimationLoop() {
+                const animate = () => {
+                    this.pendingAnimationFrame = requestAnimationFrame(animate);
+                    const delta = this.clock.getDelta();
+
+                    if (this.isAnimating || Math.abs(this.transitionProgress - this.targetProgress) > 0.001) {
+                        this.updateMarkerAnimation(Math.max(delta, 0.016));
+                    }
+
+                    this.controls.update();
+                    this.renderer.render(this.scene, this.camera);
+                };
+                animate();
+            }
+
+            bootstrapData() {
+                const seedData = [
+                    {
+                        id: 'aws-global-edge',
+                        name: 'AWS Edge Packet Loss',
+                        lat: 47.6062,
+                        lon: -122.3321,
+                        severity: 0.78,
+                        timestamp: Date.now() - 1000 * 60 * 12,
+                        description: 'Elevated error rates detected across US-West edge POPs impacting streaming workloads.'
+                    },
+                    {
+                        id: 'asia-subsea',
+                        name: 'APAC Subsea Latency Spike',
+                        lat: 1.3521,
+                        lon: 103.8198,
+                        severity: 0.92,
+                        timestamp: Date.now() - 1000 * 60 * 6,
+                        description: 'Transit latency surge on Singapore-Japan subsea corridor after rerouted traffic.'
+                    },
+                    {
+                        id: 'eu-auth',
+                        name: 'EU Authentication Outage',
+                        lat: 52.52,
+                        lon: 13.405,
+                        severity: 0.66,
+                        timestamp: Date.now() - 1000 * 60 * 3,
+                        description: 'Regional identity provider experiencing cascading token refresh failures.'
+                    },
+                    {
+                        id: 'sa-power',
+                        name: 'South America Power Instability',
+                        lat: -23.5505,
+                        lon: -46.6333,
+                        severity: 0.54,
+                        timestamp: Date.now() - 1000 * 60 * 20,
+                        description: 'Grid fluctuations causing cloud region brownouts across São Paulo availability zones.'
+                    },
+                    {
+                        id: 'global-dns',
+                        name: 'Tier-1 DNS Degradation',
+                        lat: 40.7128,
+                        lon: -74.0060,
+                        severity: 1.05,
+                        timestamp: Date.now() - 1000 * 60,
+                        description: 'Core anycast DNS layer showing high response variance across North America and Europe.'
+                    }
+                ];
+
+                this.createMarkerSystem(seedData);
+                this.scheduleSyntheticUpdates();
+            }
+
+            scheduleSyntheticUpdates() {
+                if (this.socket) return; // real-time feed is connected
+
+                setInterval(() => {
+                    const lat = THREE.MathUtils.randFloatSpread(160);
+                    const lon = THREE.MathUtils.randFloatSpread(360);
+                    const severity = THREE.MathUtils.clamp(THREE.MathUtils.randFloat(0.2, 1.1), 0.1, 1.15);
+                    this.ingestData([
+                        {
+                            name: 'Telemetry Spike',
+                            lat,
+                            lon,
+                            severity,
+                            timestamp: Date.now(),
+                            description: 'Autonomous monitoring agent detected aberrant signal propagation velocity.'
+                        }
+                    ]);
+                }, 18000);
+            }
+        }
+
+        // Initialize systems once DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide?.createIcons) {
+                window.lucide.createIcons();
+            }
+
+            new JarvisWebInterface();
+
+            const visualizer = new AnomalyVisualizer(
+                document.getElementById('anomaly-canvas'),
+                {
+                    list: document.getElementById('anomaly-list'),
+                    timeline: document.getElementById('anomaly-timeline'),
+                    count: document.getElementById('anomaly-count'),
+                    viewLabel: document.getElementById('view-label'),
+                    viewIndicator: document.getElementById('view-indicator'),
+                    toggleButton: document.getElementById('transition-toggle'),
+                    animationButton: document.getElementById('animation-toggle'),
+                    lastUpdate: document.getElementById('last-update')
+                }
+            );
+
+            // Expose for debugging / future integrations
+            window.JARVIS_ANOMALY_VISUALIZER = visualizer;
+        });
     </script>
 </body>
 </html>
